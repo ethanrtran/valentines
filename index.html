@@ -4,34 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Will you be my Valentine?</title>
-
-  <!-- Confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
-      --card: #ffffffcc;
-      --yes: #ff3b7a;
-      --yesHover: #ff1f68;
+      --bg-light: #ffeef6;
+      --bg-dark: #ffd6e7;
+      --card-bg: #ffffffcc;
+      --primary: #ff3b7a;
+      --primary-hover: #ff1f68;
+      --secondary: #e5e7eb;
+      --text-dark: #111827;
     }
 
-    * { box-sizing: border-box; }
+    * { 
+      box-sizing: border-box; 
+    }
 
     body {
       margin: 0;
       min-height: 100svh;
       display: grid;
       place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      background: radial-gradient(circle at top, var(--bg-light), var(--bg-dark));
       font-family: system-ui, sans-serif;
       overflow-x: hidden;
       overflow-y: auto;
       padding: 8px;
     }
 
-    /* FULL-SCREEN CONFETTI CANVAS */
     #confettiCanvas {
       position: fixed;
       inset: 0;
@@ -44,11 +45,11 @@
     .card {
       width: min(720px, 92vw);
       padding: 18px 20px;
-      background: var(--card);
+      background: var(--card-bg);
       backdrop-filter: blur(10px);
       border-radius: 22px;
       text-align: center;
-      box-shadow: 0 18px 60px rgba(0,0,0,.15);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.15);
     }
 
     .gif-wrap {
@@ -57,15 +58,13 @@
       margin: 0 auto 6px;
     }
 
-    /* SMALLER, RESPONSIVE GIF */
     .gif-wrap img {
-      width: 60%;       /* smaller size relative to card */
-      max-width: 300px; /* caps the size */
-      height: auto;     /* preserves aspect ratio */
+      width: 60%;
+      max-width: 300px;
+      height: auto;
       border-radius: 16px;
       display: block;
       margin: 0 auto 6px;
-      transform: none;  /* remove scaling */
     }
 
     h1 {
@@ -91,35 +90,38 @@
       border-radius: 999px;
       border: none;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .12s ease, background .12s ease;
+      transition: transform 0.12s ease, background 0.12s ease;
     }
 
     #yesBtn {
       left: 18%;
-      background: var(--yes);
-      color: #fff;
+      background: var(--primary);
+      color: white;
     }
-    #yesBtn:hover { background: var(--yesHover); }
+
+    #yesBtn:hover { 
+      background: var(--primary-hover); 
+    }
 
     #noBtn {
       left: 62%;
-      background: #e5e7eb;
-      color: #111827;
+      background: var(--secondary);
+      color: var(--text-dark);
     }
 
     .hint {
       margin-top: 10px;
       font-size: 13px;
-      opacity: .7;
+      opacity: 0.7;
     }
 
     .result {
       display: none;
       margin-top: 18px;
-      animation: pop .35s ease;
+      animation: pop 0.35s ease;
     }
 
     .result h2 {
@@ -127,9 +129,43 @@
       margin: 4px 0 4px;
     }
 
+    /* New button styles */
+    #specialBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 999px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(255, 59, 122, 0.3);
+      transform: scale(0);
+      transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
+                  background 0.12s ease;
+      z-index: 1000;
+    }
+
+    #specialBtn.show {
+      transform: scale(1);
+    }
+
+    #specialBtn:hover {
+      background: var(--primary-hover);
+    }
+
     @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      from { 
+        transform: scale(0.96); 
+        opacity: 0; 
+      }
+      to { 
+        transform: scale(1); 
+        opacity: 1; 
+      }
     }
   </style>
 </head>
@@ -138,8 +174,6 @@
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-
-    <!-- MAIN GIF -->
     <div class="gif-wrap">
       <img src="https://media.tenor.com/qb-sI_XqLqAAAAAi/bubu-dudu-sseeyall.gif" alt="Cute GIF" />
     </div>
@@ -151,116 +185,158 @@
       <button id="noBtn">No</button>
     </section>
 
-    <div class="hint" id="hint">“No” seems a bit shy 😈</div>
+    <div class="hint" id="hint">"No" seems a bit shy 😈</div>
 
     <section class="result" id="result">
       <h2>YAY! 🎉</h2>
-
-      <!-- CELEBRATION GIF -->
       <div class="gif-wrap">
         <img src="https://media1.tenor.com/m/e7S1Y510BSEAAAAC/bubu-dudu-valentine%27s-day-happy-valentine%27s-day-bubu.gif" alt="Celebration GIF" />
       </div>
     </section>
   </main>
 
-<script>
-  const zone = document.getElementById("zone");
-  const yesBtn = document.getElementById("yesBtn");
-  const noBtn = document.getElementById("noBtn");
-  const result = document.getElementById("result");
-  const hint = document.getElementById("hint");
+  <button id="specialBtn">Bonus page</button>
 
-  /* CONFETTI */
-  const confettiCanvas = document.getElementById("confettiCanvas");
+  <script>
+    // DOM Elements
+    const zone = document.getElementById("zone");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const result = document.getElementById("result");
+    const hint = document.getElementById("hint");
+    const specialBtn = document.getElementById("specialBtn");
+    const confettiCanvas = document.getElementById("confettiCanvas");
 
-  function resizeConfettiCanvas() {
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    confettiCanvas.width = Math.floor(window.innerWidth * dpr);
-    confettiCanvas.height = Math.floor(window.innerHeight * dpr);
-    confettiCanvas.style.width = "100vw";
-    confettiCanvas.style.height = "100vh";
-  }
+    // Constants
+    const CONFETTI_DURATION = 1600;
+    const NO_BUTTON_FLEE_DISTANCE = 140;
+    const NO_BUTTON_PUSH_DISTANCE = 150;
+    const MAX_YES_SCALE = 2.2;
+    const YES_SCALE_INCREMENT = 0.1;
 
-  resizeConfettiCanvas();
-  window.addEventListener("resize", resizeConfettiCanvas);
+    // Confetti Setup
+    function resizeConfettiCanvas() {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      confettiCanvas.width = Math.floor(window.innerWidth * dpr);
+      confettiCanvas.height = Math.floor(window.innerHeight * dpr);
+      confettiCanvas.style.width = "100vw";
+      confettiCanvas.style.height = "100vh";
+    }
 
-  const confettiInstance = confetti.create(confettiCanvas, { resize: false, useWorker: true });
-
-  function fullScreenConfetti() {
-    const end = Date.now() + 1600;
-    (function frame() {
-      confettiInstance({
-        particleCount: 12,
-        spread: 90,
-        startVelocity: 45,
-        ticks: 180,
-        origin: { x: Math.random(), y: Math.random() * 0.3 }
-      });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    })();
-
-    setTimeout(() => {
-      confettiInstance({
-        particleCount: 300,
-        spread: 140,
-        startVelocity: 60,
-        ticks: 220,
-        origin: { x: 0.5, y: 0.55 }
-      });
-    }, 300);
-  }
-
-  /* YES BUTTON GROWS */
-  let yesScale = 1;
-  function growYes() {
-    yesScale = Math.min(2.2, yesScale + 0.1);
-    yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
-  }
-
-  /* NO BUTTON RUNS AWAY */
-  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
-  function moveNo(px, py) {
-    const z = zone.getBoundingClientRect();
-    const b = noBtn.getBoundingClientRect();
-
-    let dx = (b.left + b.width / 2) - px;
-    let dy = (b.top + b.height / 2) - py;
-    let mag = Math.hypot(dx, dy) || 1;
-    dx /= mag;
-    dy /= mag;
-
-    let newLeft = (b.left - z.left) + dx * 150;
-    let newTop  = (b.top - z.top) + dy * 150;
-
-    newLeft = clamp(newLeft, 0, z.width - b.width);
-    newTop  = clamp(newTop, 0, z.height - b.height);
-
-    noBtn.style.left = newLeft + "px";
-    noBtn.style.top = newTop + "px";
-    noBtn.style.transform = "none";
-
-    growYes();
-  }
-
-  zone.addEventListener("pointermove", e => {
-    const b = noBtn.getBoundingClientRect();
-    const d = Math.hypot(
-      (b.left + b.width / 2) - e.clientX,
-      (b.top + b.height / 2) - e.clientY
-    );
-    if (d < 140) moveNo(e.clientX, e.clientY);
-  });
-
-  noBtn.addEventListener("click", e => e.preventDefault());
-
-  yesBtn.addEventListener("click", () => {
-    zone.style.display = "none";
-    hint.style.display = "none";
-    result.style.display = "block";
     resizeConfettiCanvas();
-    fullScreenConfetti();
-  });
-</script>
+    window.addEventListener("resize", resizeConfettiCanvas);
+
+    const confettiInstance = confetti.create(confettiCanvas, { 
+      resize: false, 
+      useWorker: true 
+    });
+
+    function fullScreenConfetti() {
+      const endTime = Date.now() + CONFETTI_DURATION;
+      
+      (function frame() {
+        confettiInstance({
+          particleCount: 12,
+          spread: 90,
+          startVelocity: 45,
+          ticks: 180,
+          origin: { x: Math.random(), y: Math.random() * 0.3 }
+        });
+        if (Date.now() < endTime) {
+          requestAnimationFrame(frame);
+        }
+      })();
+
+      setTimeout(() => {
+        confettiInstance({
+          particleCount: 300,
+          spread: 140,
+          startVelocity: 60,
+          ticks: 220,
+          origin: { x: 0.5, y: 0.55 }
+        });
+      }, 300);
+    }
+
+    // Yes Button Growth
+    let yesScale = 1;
+
+    function growYes() {
+      yesScale = Math.min(MAX_YES_SCALE, yesScale + YES_SCALE_INCREMENT);
+      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+    }
+
+    // No Button Evasion
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function moveNoButton(pointerX, pointerY) {
+      const zoneRect = zone.getBoundingClientRect();
+      const buttonRect = noBtn.getBoundingClientRect();
+
+      const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+
+      let deltaX = buttonCenterX - pointerX;
+      let deltaY = buttonCenterY - pointerY;
+      const distance = Math.hypot(deltaX, deltaY) || 1;
+
+      // Normalize direction
+      deltaX /= distance;
+      deltaY /= distance;
+
+      // Calculate new position
+      let newLeft = (buttonRect.left - zoneRect.left) + deltaX * NO_BUTTON_PUSH_DISTANCE;
+      let newTop = (buttonRect.top - zoneRect.top) + deltaY * NO_BUTTON_PUSH_DISTANCE;
+
+      // Keep button within zone bounds
+      newLeft = clamp(newLeft, 0, zoneRect.width - buttonRect.width);
+      newTop = clamp(newTop, 0, zoneRect.height - buttonRect.height);
+
+      noBtn.style.left = `${newLeft}px`;
+      noBtn.style.top = `${newTop}px`;
+      noBtn.style.transform = "none";
+
+      growYes();
+    }
+
+    // Event Listeners
+    zone.addEventListener("pointermove", (event) => {
+      const buttonRect = noBtn.getBoundingClientRect();
+      const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+      
+      const distanceToButton = Math.hypot(
+        buttonCenterX - event.clientX,
+        buttonCenterY - event.clientY
+      );
+
+      if (distanceToButton < NO_BUTTON_FLEE_DISTANCE) {
+        moveNoButton(event.clientX, event.clientY);
+      }
+    });
+
+    noBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+    });
+
+    yesBtn.addEventListener("click", () => {
+      zone.style.display = "none";
+      hint.style.display = "none";
+      result.style.display = "block";
+      resizeConfettiCanvas();
+      fullScreenConfetti();
+      
+      // Show special button after a short delay
+      setTimeout(() => {
+        specialBtn.classList.add("show");
+      }, 800);
+    });
+
+    specialBtn.addEventListener("click", () => {
+      window.location.href = "index2.html";
+    });
+  </script>
 </body>
 </html>
